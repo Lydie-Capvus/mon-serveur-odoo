@@ -1,14 +1,15 @@
 const express = require('express');
 const cors = require('cors');
-app.use(cors());
 const xmlrpc = require('xmlrpc');
+
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 
 app.post('/odoo-lead', (req, res) => {
     const data = req.body;
 
-    // TES INFORMATIONS PERSONNALISÉES
     const ODOO_URL = 'https://boost-total-developpement.odoo.com';
     const DB = 'boost-total-developpement'; 
     const USER = 'recruteurgpe.prodcapvus@gmail.com'; 
@@ -43,5 +44,5 @@ app.post('/odoo-lead', (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`Serveur prêt sur le port ${PORT}`));
