@@ -25,21 +25,32 @@ app.post('/odoo-lead', (req, res) => {
 
         const models = xmlrpc.createSecureClient(`${ODOO_URL}/xmlrpc/2/object`);
         
-        models.methodCall('execute_kw', [DB, uid, PASS, 'crm.lead', 'create', [{
-            'name': `Lead Web: ${data.nom} ${data.prenom}`,
-            'contact_name': `${data.nom} ${data.prenom}`,
-            'email_from': data.email,
+        models.methodCall('execute_kw', [DB, uid, PASS, 'res.partner', 'create', [{
+            'name': `${data.nom} ${data.prenom}`,
+            'email': data.email,
             'phone': data.telephone,
-            'company_id': 2, 
-            'description': `Message: ${data.message} | Pays: ${data.pays} | Ville: ${data.ville} | Société: ${data.societe} | Catégorie: ${data.categorie}`,
-            'partner_name': data.societe,
-            'type': 'opportunity'
-        }]], (err, result) => {
+            'city': data.ville,
+            'is_company': false
+        }]], (err, partnerId) => {
             if (err) {
-                console.error("Erreur Création:", err);
-                return res.status(500).send("Erreur création Odoo");
+                console.error("Erreur Création Contact:", err);
+                return res.status(500).send("Erreur création contact");
             }
-            res.send({ success: true, id: result });
+            
+            models.methodCall('execute_kw', [DB, uid, PASS, 'crm.lead', 'create', [{
+                'name': `Lead Web: ${data.nom} ${data.prenom}`,
+                'partner_id': partnerId,
+                'email_from': data.email,
+                'phone': data.telephone,
+                'description': `Message: ${data.message} | Ville: ${data.ville} | Société: ${data.societe} | Catégorie: ${data.categorie}`,
+                'type': 'opportunity'
+            }]], (err, result) => {
+                if (err) {
+                    console.error("Erreur Création Lead:", err);
+                    return res.status(500).send("Erreur création lead");
+                }
+                res.send({ success: true, id: result });
+            });
         });
     });
 });
