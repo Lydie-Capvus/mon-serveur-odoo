@@ -1,4 +1,6 @@
 const express = require('express');
+const cors = require('cors');
+app.use(cors());
 const xmlrpc = require('xmlrpc');
 const app = express();
 app.use(express.json());
