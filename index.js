@@ -15,7 +15,8 @@ app.post('/odoo-lead', (req, res) => {
     const USER = 'recruteurgpe.prodcapvus@gmail.com'; 
     const PASS = '7e30aff65dd971e72b4a17eca2550fc5f4d61f85';
 
-    const villeRecue = data.Ville || data.ville || '';
+    // Sécurité pour récupérer la ville avec ou sans majuscule
+    const villeRecue = data.Ville || data.ville || 'Non précisée';
 
     const common = xmlrpc.createSecureClient(`${ODOO_URL}/xmlrpc/2/common`);
     
@@ -34,7 +35,8 @@ app.post('/odoo-lead', (req, res) => {
             'phone': String(data.whatsapp || data.telephone || ''),
             'description': `Ville: ${villeRecue}\nPays: ${data.pays || ''}\nMessage: ${data.message || ''}\nCatégorie: ${data.categorie || ''}`,
             'x_studio_source_du_prospect': 'Site Web',
-            'type': 'opportunity'
+            'type': 'opportunity',
+            'lang_id': false
         }]], (err, result) => {
             if (err) {
                 console.error("ERREUR CREATION ODOO :", err);
