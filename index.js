@@ -11,7 +11,7 @@ app.post('/odoo-lead', (req, res) => {
     const data = req.body;
 
     const ODOO_URL = 'https://techultra-solutions-boosttotal.odoo.com';
-    const DB = 'boost-total-developpement';
+    const DB = 'techultra-solutions-boosttotal-live-29673368';
     const USER = 'recruteurgpe.prodcapvus@gmail.com'; 
     const PASS = '7e30aff65dd971e72b4a17eca2550fc5f4d61f85';
 
