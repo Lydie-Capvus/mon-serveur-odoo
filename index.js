@@ -28,8 +28,8 @@ app.post('/odoo-lead', (req, res) => {
         models.methodCall('execute_kw', [DB, uid, PASS, 'res.partner', 'create', [{
             'name': `${data.nom} ${data.prenom}`,
             'email': data.email,
-            'phone': data.whatsapp,
-            'city': data.ville,
+            'phone': String(data.whatsapp),
+            'city': String(data.ville),
             'is_company': false
         }]], (err, partnerId) => {
             if (err) {
@@ -41,11 +41,16 @@ app.post('/odoo-lead', (req, res) => {
                 'name': `WIX: ${data.nom} ${data.prenom}`,
                 'partner_id': partnerId,
                 'email_from': data.email,
-                'phone': data.whatsapp,
-                'x_studio_ville_1': data.ville,
-                'x_studio_pays': data.pays,
+                'phone': String(data.whatsapp),
+                'x_studio_ville_1': String(data.ville),
+                'x_studio_pays': String(data.pays),
                 'x_studio_source_du_prospect': 'Site Web',
-                'description': `Message: ${data.message} | Tél fixe/autre: ${data.telephone} | WhatsApp: ${data.whatsapp} | Société: ${data.societe} | Catégorie: ${data.categorie}`,
+                'description': `LANGUE: ${data.langue}\n` +
+                               `TÉLÉPHONE FIXE: ${data.telephone}\n` +
+                               `WHATSAPP: ${data.whatsapp}\n` +
+                               `SOCIÉTÉ: ${data.societe}\n` +
+                               `CATÉGORIE: ${data.categorie}\n` +
+                               `MESSAGE: ${data.message}`,
                 'type': 'opportunity'
             }]], (err, result) => {
                 if (err) {
