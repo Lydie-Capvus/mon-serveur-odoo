@@ -29,6 +29,7 @@ app.post('/odoo-lead', (req, res) => {
             'name': `${data.nom} ${data.prenom}`,
             'email': data.email,
             'phone': data.telephone,
+            'mobile': data.whatsapp,
             'city': data.ville,
             'is_company': false
         }]], (err, partnerId) => {
@@ -38,11 +39,15 @@ app.post('/odoo-lead', (req, res) => {
             }
             
             models.methodCall('execute_kw', [DB, uid, PASS, 'crm.lead', 'create', [{
-                'name': `Lead Web: ${data.nom} ${data.prenom}`,
+                'name': `WIX: ${data.nom} ${data.prenom}`,
                 'partner_id': partnerId,
                 'email_from': data.email,
                 'phone': data.telephone,
-                'description': `Message: ${data.message} | Ville: ${data.ville} | Société: ${data.societe} | Catégorie: ${data.categorie}`,
+                'mobile': data.whatsapp,
+                'city': data.ville,
+                'pays': data.pays,
+                'source_id': 1,
+                'description': `Message: ${data.message} | Société: ${data.societe} | Catégorie: ${data.categorie}`,
                 'type': 'opportunity'
             }]], (err, result) => {
                 if (err) {
