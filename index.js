@@ -15,16 +15,12 @@ app.post('/odoo-lead', (req, res) => {
     const USER = 'recruteurgpe.prodcapvus@gmail.com'; 
     const PASS = '7e30aff65dd971e72b4a17eca2550fc5f4d61f85';
 
-    // Sécurité pour récupérer la ville avec ou sans majuscule
     const villeRecue = data.Ville || data.ville || 'Non précisée';
 
     const common = xmlrpc.createSecureClient(`${ODOO_URL}/xmlrpc/2/common`);
     
     common.methodCall('authenticate', [DB, USER, PASS, {}], (err, uid) => {
-        if (err || !uid) {
-            console.error("ERREUR AUTH ODOO");
-            return res.status(500).send("Auth echouee");
-        }
+        if (err || !uid) return res.status(500).send("Auth echouee");
 
         const models = xmlrpc.createSecureClient(`${ODOO_URL}/xmlrpc/2/object`);
         
@@ -33,13 +29,15 @@ app.post('/odoo-lead', (req, res) => {
             'contact_name': `${data.nom || ''} ${data.prenom || ''}`,
             'email_from': data.email || '',
             'phone': String(data.whatsapp || data.telephone || ''),
-            'description': `Ville: ${villeRecue}\nPays: ${data.pays || ''}\nMessage: ${data.message || ''}\nCatégorie: ${data.categorie || ''}`,
+            'description': `Ville: ${villeRecue}\nPays: ${data.pays || ''}\nMessage: ${data.message || ''}`,
             'x_studio_source_du_prospect': 'Site Web',
             'type': 'opportunity',
-            'lang_id': false
+            // --- BLOCAGE TOTAL DU BUG ARABE ---
+            'lang_id': false, 
+            'context': { 'lang': 'fr_FR', 'create_crm_lead_from_website': true }
         }]], (err, result) => {
             if (err) {
-                console.error("ERREUR CREATION ODOO :", err);
+                console.error("ERREUR ODOO :", err);
                 return res.status(500).send("Erreur Odoo");
             }
             console.log("SUCCES : Lead cree avec l'ID", result);
@@ -49,4 +47,4 @@ app.post('/odoo-lead', (req, res) => {
 });
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Serveur prêt sur port ${PORT}`));
+app.listen(PORT, () => console.log(`Serveur prêt`));
