@@ -42,9 +42,9 @@ app.post('/odoo-lead', (req, res) => {
                 'partner_id': partnerId,
                 'email_from': data.email,
                 'phone': data.whatsapp,
-                'city': data.ville,
-                'pays': data.pays,
-                'source_id': 1,
+                'x_studio_ville_1': data.ville,
+                'x_studio_pays': data.pays,
+                'x_studio_source_du_prospect': 'Site Web',
                 'description': `Message: ${data.message} | Tél fixe/autre: ${data.telephone} | WhatsApp: ${data.whatsapp} | Société: ${data.societe} | Catégorie: ${data.categorie}`,
                 'type': 'opportunity'
             }]], (err, result) => {
