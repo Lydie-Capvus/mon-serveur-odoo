@@ -39,7 +39,6 @@ app.post('/odoo-lead', (req, res) => {
                 'partner_id': partnerId,
                 'email_from': data.email,
                 'phone': String(data.whatsapp || ''),
-                'x_studio_source_du_prospect': 'Site Web',
                 'description': `DÉTAILS :\n` +
                                `SOCIÉTÉ: ${data.societe || ''}\n` +
                                `VILLE: ${data.ville || ''}\n` +
