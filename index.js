@@ -19,42 +19,37 @@ app.post('/odoo-lead', (req, res) => {
     
     common.methodCall('authenticate', [DB, USER, PASS, {}], (err, uid) => {
         if (err || !uid) {
-            console.error("Erreur Auth:", err);
             return res.status(500).send("Auth Odoo échouée");
         }
 
         const models = xmlrpc.createSecureClient(`${ODOO_URL}/xmlrpc/2/object`);
         
         models.methodCall('execute_kw', [DB, uid, PASS, 'res.partner', 'create', [{
-            'name': `${data.nom} ${data.prenom}`,
+            'name': `${data.nom || ''} ${data.prenom || ''}`,
             'email': data.email,
-            'phone': String(data.whatsapp),
+            'phone': String(data.whatsapp || ''),
             'is_company': false
         }]], (err, partnerId) => {
             if (err) {
-                console.error("Erreur Création Contact:", err);
-                return res.status(500).send("Erreur création contact");
+                return res.status(500).send("Erreur contact");
             }
             
             models.methodCall('execute_kw', [DB, uid, PASS, 'crm.lead', 'create', [{
-                'name': `WIX: ${data.nom} ${data.prenom}`,
+                'name': `WIX: ${data.nom || ''} ${data.prenom || ''}`,
                 'partner_id': partnerId,
                 'email_from': data.email,
-                'phone': String(data.whatsapp),
+                'phone': String(data.whatsapp || ''),
                 'x_studio_source_du_prospect': 'Site Web',
-                'description': `--- INFOS COMPLÉMENTAIRES ---\n` +
-                               `LANGUE: ${data.langue}\n` +
-                               `PAYS: ${data.pays}\n` +
-                               `VILLE: ${data.ville}\n` +
-                               `TÉLÉPHONE FIXE: ${data.telephone}\n` +
-                               `SOCIÉTÉ: ${data.societe}\n` +
-                               `CATÉGORIE: ${data.categorie}\n` +
-                               `MESSAGE: ${data.message}`,
+                'description': `DÉTAILS :\n` +
+                               `SOCIÉTÉ: ${data.societe || ''}\n` +
+                               `VILLE: ${data.ville || ''}\n` +
+                               `PAYS: ${data.pays || ''}\n` +
+                               `CATÉGORIE: ${data.categorie || ''}\n` +
+                               `MESSAGE: ${data.message || ''}`,
                 'type': 'opportunity'
             }]], (err, result) => {
                 if (err) {
-                    console.error("Erreur Création Lead:", err);
-                    return res.status(500).send("Erreur création lead");
+                    return res.status(500).send("Erreur lead");
                 }
                 res.send({ success: true, id: result });
             });
