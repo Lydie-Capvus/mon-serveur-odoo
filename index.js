@@ -15,6 +15,8 @@ app.post('/odoo-lead', (req, res) => {
     const USER = 'recruteurgpe.prodcapvus@gmail.com'; 
     const PASS = '7e30aff65dd971e72b4a17eca2550fc5f4d61f85';
 
+    const villeRecue = data.Ville || data.ville || '';
+
     const common = xmlrpc.createSecureClient(`${ODOO_URL}/xmlrpc/2/common`);
     
     common.methodCall('authenticate', [DB, USER, PASS, {}], (err, uid) => {
@@ -25,13 +27,12 @@ app.post('/odoo-lead', (req, res) => {
 
         const models = xmlrpc.createSecureClient(`${ODOO_URL}/xmlrpc/2/object`);
         
-        // Création UNIQUE et DIRECTE du Lead (Piste) pour éviter les conflits
         models.methodCall('execute_kw', [DB, uid, PASS, 'crm.lead', 'create', [{
             'name': `WIX: ${data.nom || ''} ${data.prenom || ''}`,
             'contact_name': `${data.nom || ''} ${data.prenom || ''}`,
             'email_from': data.email || '',
             'phone': String(data.whatsapp || data.telephone || ''),
-            'description': `Ville: ${data.ville || ''}\nPays: ${data.pays || ''}\nMessage: ${data.message || ''}\nCatégorie: ${data.categorie || ''}`,
+            'description': `Ville: ${villeRecue}\nPays: ${data.pays || ''}\nMessage: ${data.message || ''}\nCatégorie: ${data.categorie || ''}`,
             'x_studio_source_du_prospect': 'Site Web',
             'type': 'opportunity'
         }]], (err, result) => {
