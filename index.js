@@ -15,7 +15,20 @@ app.post('/odoo-lead', (req, res) => {
     const USER = 'recruteurgpe.prodcapvus@gmail.com'; 
     const PASS = '7e30aff65dd971e72b4a17eca2550fc5f4d61f85';
 
+    // On prépare une description qui regroupe TOUT ce qui n'est pas standard
     const villeRecue = data.Ville || data.ville || 'Non précisée';
+    const paysRecu = data.pays || 'Non précisé';
+    const categorieRecue = data.categorie || 'Non précisée';
+    
+    const descriptionComplete = `
+INFOS COMPLÉMENTAIRES :
+----------------------
+Ville : ${villeRecue}
+Pays : ${paysRecu}
+Catégorie : ${categorieRecue}
+Message : ${data.message || ''}
+Source : Site Web (Wix)
+    `.trim();
 
     const common = xmlrpc.createSecureClient(`${ODOO_URL}/xmlrpc/2/common`);
     
@@ -24,23 +37,21 @@ app.post('/odoo-lead', (req, res) => {
 
         const models = xmlrpc.createSecureClient(`${ODOO_URL}/xmlrpc/2/object`);
         
+        // On n'envoie que les champs de base qui existent TOUJOURS dans Odoo
         models.methodCall('execute_kw', [DB, uid, PASS, 'crm.lead', 'create', [{
             'name': `WIX: ${data.nom || ''} ${data.prenom || ''}`,
             'contact_name': `${data.nom || ''} ${data.prenom || ''}`,
             'email_from': data.email || '',
             'phone': String(data.whatsapp || data.telephone || ''),
-            'description': `Ville: ${villeRecue}\nPays: ${data.pays || ''}\nMessage: ${data.message || ''}`,
-            'x_studio_source_du_prospect': 'Site Web',
+            'description': descriptionComplete,
             'type': 'opportunity',
-            // --- BLOCAGE TOTAL DU BUG ARABE ---
-            'lang_id': false, 
-            'context': { 'lang': 'fr_FR', 'create_crm_lead_from_website': true }
+            'lang_id': false
         }]], (err, result) => {
             if (err) {
                 console.error("ERREUR ODOO :", err);
                 return res.status(500).send("Erreur Odoo");
             }
-            console.log("SUCCES : Lead cree avec l'ID", result);
+            console.log("SUCCES TOTAL : Lead cree avec l'ID", result);
             res.send({ success: true, id: result });
         });
     });
