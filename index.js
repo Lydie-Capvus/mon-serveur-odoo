@@ -15,41 +15,32 @@ app.post('/odoo-lead', (req, res) => {
     const USER = 'recruteurgpe.prodcapvus@gmail.com'; 
     const PASS = '7e30aff65dd971e72b4a17eca2550fc5f4d61f85';
 
-    let notesFormulaire = "--- DONNÉES DU FORMULAIRE ---\n";
-    for (const [key, value] of Object.entries(data)) {
-        notesFormulaire += `${key}: ${value}\n`;
-    }
-
     const common = xmlrpc.createSecureClient(`${ODOO_URL}/xmlrpc/2/common`);
     
     common.methodCall('authenticate', [DB, USER, PASS, {}], (err, uid) => {
-        if (err || !uid) return res.status(500).send("Auth echouee");
+        if (err || !uid) {
+            console.error("ERREUR AUTH ODOO");
+            return res.status(500).send("Auth echouee");
+        }
 
         const models = xmlrpc.createSecureClient(`${ODOO_URL}/xmlrpc/2/object`);
         
-        models.methodCall('execute_kw', [DB, uid, PASS, 'res.partner', 'create', [{
-            'name': `${data.nom || ''} ${data.prenom || ''}`.trim() || "Prospect Wix",
-            'email': data.email || '',
+        // Création UNIQUE et DIRECTE du Lead (Piste) pour éviter les conflits
+        models.methodCall('execute_kw', [DB, uid, PASS, 'crm.lead', 'create', [{
+            'name': `WIX: ${data.nom || ''} ${data.prenom || ''}`,
+            'contact_name': `${data.nom || ''} ${data.prenom || ''}`,
+            'email_from': data.email || '',
             'phone': String(data.whatsapp || data.telephone || ''),
-            'lang': 'fr_FR',
-            'is_company': false
-        }]], (err, partnerId) => {
-            
-            const finalPartnerId = err ? false : partnerId;
-
-            models.methodCall('execute_kw', [DB, uid, PASS, 'crm.lead', 'create', [{
-                'name': `WIX: ${data.nom || ''} ${data.prenom || ''}`,
-                'partner_id': finalPartnerId,
-                'email_from': data.email || '',
-                'phone': String(data.whatsapp || data.telephone || ''),
-                'x_studio_source_du_prospect': 'Site Web',
-                'description': notesFormulaire,
-                'type': 'opportunity'
-            }]], (err, result) => {
-                if (err) return res.status(500).send("Erreur Odoo");
-                console.log("SUCCES ID:", result);
-                res.send({ success: true, id: result });
-            });
+            'description': `Ville: ${data.ville || ''}\nPays: ${data.pays || ''}\nMessage: ${data.message || ''}\nCatégorie: ${data.categorie || ''}`,
+            'x_studio_source_du_prospect': 'Site Web',
+            'type': 'opportunity'
+        }]], (err, result) => {
+            if (err) {
+                console.error("ERREUR CREATION ODOO :", err);
+                return res.status(500).send("Erreur Odoo");
+            }
+            console.log("SUCCES : Lead cree avec l'ID", result);
+            res.send({ success: true, id: result });
         });
     });
 });
